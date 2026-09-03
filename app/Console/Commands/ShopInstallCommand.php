@@ -33,8 +33,8 @@ class ShopInstallCommand extends Command
     {
         $stack = $this->resolveStack();
 
-        if (! array_key_exists($stack, ShopStack::all())) {
-            $this->error('Неизвестный стек: '.$stack);
+        if ($stack === null || ! array_key_exists($stack, ShopStack::all())) {
+            $this->error('Неизвестный стек. Укажите 1–5 или blade / inertia-vue / inertia-react / spa-vue / spa-react.');
 
             return self::FAILURE;
         }
@@ -74,23 +74,23 @@ class ShopInstallCommand extends Command
         return self::SUCCESS;
     }
 
-    private function resolveStack(): string
+    private function resolveStack(): ?string
     {
         $stack = $this->option('stack');
 
         if (is_string($stack) && $stack !== '') {
-            return $stack;
+            return ShopStack::resolve($stack);
         }
 
         if ($this->option('no-interaction')) {
             return ShopStack::BLADE;
         }
 
-        return select(
+        return ShopStack::resolve(select(
             label: 'Что установить?',
-            options: ShopStack::all(),
-            default: ShopStack::BLADE,
-        );
+            options: ShopStack::installChoices(),
+            default: '1',
+        ));
     }
 
     private function applyStub(string $stack): void

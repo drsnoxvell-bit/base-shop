@@ -13,17 +13,25 @@ class ShopPayload
 {
     public static function productCard(Product $product): array
     {
+        $savings = $product->savings();
+
         return [
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
             'sku' => $product->sku,
+            'excerpt' => $product->excerpt(),
             'price' => (float) $product->price,
             'price_formatted' => shop_money($product->price),
             'old_price' => $product->old_price ? (float) $product->old_price : null,
             'old_price_formatted' => $product->old_price ? shop_money($product->old_price) : null,
+            'discount_percent' => $product->discountPercent(),
+            'savings_formatted' => $savings ? shop_money($savings) : null,
             'quantity' => $product->quantity,
             'in_stock' => $product->inStock(),
+            'stock_status' => $product->stockStatus(),
+            'stock_label' => $product->stockLabel(),
+            'photos_count' => $product->photosCount(),
             'cover_url' => $product->coverUrl(),
             'category' => $product->category ? [
                 'id' => $product->category->id,

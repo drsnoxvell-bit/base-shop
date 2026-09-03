@@ -1,20 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
-import { useShop } from '../App';
+import ProductCard from '../components/ProductCard';
 
 export default function Home() {
     const [data, setData] = useState({ site: {}, categories: [], products: [] });
-    const { refresh } = useShop();
 
     useEffect(() => {
         api.get('/api/shop/home').then((r) => setData(r.data));
     }, []);
-
-    const add = async (id) => {
-        await api.post(`/api/shop/cart/${id}`, { qty: 1 });
-        await refresh?.();
-    };
 
     return (
         <>
@@ -38,18 +32,7 @@ export default function Home() {
                 <h2 className="shop-h2">Популярные товары</h2>
                 <div className="shop-grid-products">
                     {(data.products || []).map((product) => (
-                        <div key={product.id} className="shop-product-card">
-                            <Link to={`/product/${product.slug}`} className="shop-product-photo">
-                                {product.cover_url ? <img src={product.cover_url} alt={product.name} /> : <span className="shop-photo-empty">Нет фото</span>}
-                            </Link>
-                            <div className="shop-product-body">
-                                <Link to={`/product/${product.slug}`} className="shop-product-name">{product.name}</Link>
-                                <div className="shop-price-row"><strong>{product.price_formatted}</strong></div>
-                                <button className="shop-btn shop-btn-sm mt-3" type="button" disabled={!product.in_stock} onClick={() => add(product.id)}>
-                                    {product.in_stock ? 'В корзину' : 'Нет в наличии'}
-                                </button>
-                            </div>
-                        </div>
+                        <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
             </section>

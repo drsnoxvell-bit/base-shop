@@ -60,10 +60,42 @@ class ShopStorefrontTest extends TestCase
         $this->get('/admin/login')->assertOk();
     }
 
+    public function test_product_card_shows_sku_stock_and_discount(): void
+    {
+        $product = Product::query()->active()->whereNotNull('old_price')->firstOrFail();
+
+        $this->get(route('shop.catalog'))
+            ->assertOk()
+            ->assertSee($product->name)
+            ->assertSee($product->sku)
+            ->assertSee('Артикул')
+            ->assertSee('В корзину')
+            ->assertSee('Подробнее');
+    }
+
     public function test_api_home_returns_json(): void
     {
         $this->getJson('/api/shop/home')
             ->assertOk()
-            ->assertJsonStructure(['site', 'categories', 'products']);
+            ->assertJsonStructure([
+                'site',
+                'categories',
+                'products' => [[
+                    'id',
+                    'name',
+                    'slug',
+                    'sku',
+                    'excerpt',
+                    'price_formatted',
+                    'old_price_formatted',
+                    'discount_percent',
+                    'savings_formatted',
+                    'stock_status',
+                    'stock_label',
+                    'photos_count',
+                    'cover_url',
+                    'category' => ['id', 'name', 'slug'],
+                ]],
+            ]);
     }
 }

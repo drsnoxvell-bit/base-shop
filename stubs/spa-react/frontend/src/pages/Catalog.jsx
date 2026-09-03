@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useShop } from '../App';
+import ProductCard from '../components/ProductCard';
 
 export function Catalog() {
     const [products, setProducts] = useState({ data: [] });
@@ -11,10 +12,7 @@ export function Catalog() {
             <h1 className="shop-h1">Каталог</h1>
             <div className="shop-grid-products">
                 {(products.data || []).map((product) => (
-                    <div key={product.id} className="shop-product-card">
-                        <Link to={`/product/${product.slug}`} className="shop-product-name">{product.name}</Link>
-                        <div className="shop-price-row"><strong>{product.price_formatted}</strong></div>
-                    </div>
+                    <ProductCard key={product.id} product={product} />
                 ))}
             </div>
         </>
@@ -30,9 +28,7 @@ export function Category() {
             <h1 className="shop-h1">{data.category?.name}</h1>
             <div className="shop-grid-products">
                 {(data.products?.data || []).map((product) => (
-                    <Link key={product.id} to={`/product/${product.slug}`} className="shop-product-card">
-                        <div className="shop-product-body">{product.name}</div>
-                    </Link>
+                    <ProductCard key={product.id} product={product} />
                 ))}
             </div>
         </>

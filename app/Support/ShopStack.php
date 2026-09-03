@@ -25,6 +25,38 @@ class ShopStack
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public static function installChoices(): array
+    {
+        $choices = [];
+        $number = 1;
+
+        foreach (self::all() as $label) {
+            $choices[(string) $number] = $number.'. '.$label;
+            $number++;
+        }
+
+        return $choices;
+    }
+
+    public static function resolve(string|int $value): ?string
+    {
+        $value = (string) $value;
+
+        if (array_key_exists($value, self::all())) {
+            return $value;
+        }
+
+        $keys = array_keys(self::all());
+        $index = (int) $value - 1;
+
+        return ($value === (string) ((int) $value) && isset($keys[$index]))
+            ? $keys[$index]
+            : null;
+    }
+
     public static function current(): string
     {
         $stack = (string) config('shop.stack', self::BLADE);

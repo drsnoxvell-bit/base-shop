@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Orchid\Attachment\Attachable;
 use Orchid\Attachment\Models\Attachment;
 use Orchid\Filters\Filterable;
@@ -95,5 +96,63 @@ class Product extends Model
     public function inStock(): bool
     {
         return $this->quantity > 0;
+    }
+
+    public function discountPercent(): ?int
+    {
+        if (! $this->old_price || (float) $this->old_price <= (float) $this->price) {
+            return null;
+        }
+
+        return (int) round((1 - ((float) $this->price / (float) $this->old_price)) * 100);
+    }
+
+    public function savings(): ?float
+    {
+        if ($this->discountPercent() === null) {
+            return null;
+        }
+
+        return (float) $this->old_price - (float) $this->price;
+    }
+
+    public function excerpt(int $limit = 110): string
+    {
+        $text = (string) preg_replace('/\s+/u', ' ', strip_tags((string) $this->description));
+
+        $text = trim($text);
+
+        return $text === '' ? '' : Str::limit($text, $limit);
+    }
+
+    public function stockStatus(): string
+    {
+        if ($this->quantity < 1) {
+            return 'out';
+        }
+
+        if ($this->quantity <= 5) {
+            return 'low';
+        }
+
+        return 'ok';
+    }
+
+    public function stockLabel(): string
+    {
+        return match ($this->stockStatus()) {
+            'out' => 'Нет в наличии',
+            'low' => 'Осталось '.$this->quantity.' шт.',
+            default => 'В наличии · '.$this->quantity.' шт.',
+        };
+    }
+
+    public function photosCount(): int
+    {
+        if ($this->relationLoaded('attachment')) {
+            return $this->attachment->count();
+        }
+
+        return $this->attachments()->count();
     }
 }

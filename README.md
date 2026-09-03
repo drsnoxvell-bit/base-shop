@@ -44,7 +44,7 @@ cmd /c "composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev
 & "C:\ProgramData\ComposerSetup\bin\composer.bat" install
 ```
 
-После копирования файлов запустится `php artisan shop:install`. Выберите стек:
+После копирования файлов запустится `php artisan shop:install`. Введите номер стека:
 
 1. Blade — шаблоны Laravel, без Vue/React
 2. Inertia + Vue — монолит Laravel + Vue
@@ -57,6 +57,7 @@ cmd /c "composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev
 Неинтерактивно:
 
 ```bash
+php artisan shop:install --stack=1
 php artisan shop:install --stack=blade --no-interaction --skip-admin
 php artisan shop:install --stack=inertia-vue
 php artisan shop:install --stack=spa-react --keep-stubs

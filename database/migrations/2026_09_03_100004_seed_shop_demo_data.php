@@ -70,14 +70,14 @@ return new class extends Migration
         $ids = Category::query()->pluck('id', 'slug');
 
         $products = [
-            ['sku' => 'CF-ETH-1', 'slug' => 'ethiopia-beans', 'name' => 'Кофе в зёрнах Ethiopia', 'category' => 'coffee-tea', 'price' => 890, 'old_price' => 1090, 'qty' => 24, 'images' => 3, 'color' => [140, 74, 42], 'text' => "Кофе\nEthiopia"],
-            ['sku' => 'TEA-SEN-1', 'slug' => 'sencha-green', 'name' => 'Зелёный чай сенча', 'category' => 'coffee-tea', 'price' => 520, 'old_price' => null, 'qty' => 18, 'images' => 2, 'color' => [46, 110, 72], 'text' => "Чай\nсенча"],
-            ['sku' => 'CUP-CER-1', 'slug' => 'ceramic-mug', 'name' => 'Керамическая кружка', 'category' => 'tableware', 'price' => 650, 'old_price' => 790, 'qty' => 30, 'images' => 4, 'color' => [176, 92, 80], 'text' => "Кружка"],
-            ['sku' => 'FP-800', 'slug' => 'french-press', 'name' => 'Френч-пресс 800 мл', 'category' => 'tableware', 'price' => 1490, 'old_price' => null, 'qty' => 12, 'images' => 2, 'color' => [70, 90, 110], 'text' => "Френч-\nпресс"],
-            ['sku' => 'CH-70', 'slug' => 'dark-chocolate', 'name' => 'Горький шоколад 70%', 'category' => 'sweets', 'price' => 280, 'old_price' => null, 'qty' => 40, 'images' => 1, 'color' => [92, 52, 40], 'text' => "Шоколад"],
-            ['sku' => 'HN-FL', 'slug' => 'flower-honey', 'name' => 'Мёд цветочный 500 г', 'category' => 'sweets', 'price' => 740, 'old_price' => 820, 'qty' => 16, 'images' => 3, 'color' => [196, 140, 40], 'text' => "Мёд"],
-            ['sku' => 'GR-HND', 'slug' => 'hand-grinder', 'name' => 'Кофемолка ручная', 'category' => 'accessories', 'price' => 2390, 'old_price' => 2690, 'qty' => 8, 'images' => 2, 'color' => [90, 90, 96], 'text' => "Кофемолка"],
-            ['sku' => 'SYR-VN', 'slug' => 'vanilla-syrup', 'name' => 'Сироп ванильный', 'category' => 'accessories', 'price' => 430, 'old_price' => null, 'qty' => 22, 'images' => 5, 'color' => [214, 176, 120], 'text' => "Сироп"],
+            ['sku' => 'CF-ETH-1', 'slug' => 'ethiopia-beans', 'name' => 'Кофе в зёрнах Ethiopia', 'category' => 'coffee-tea', 'price' => 890, 'old_price' => 1090, 'qty' => 24, 'images' => 3, 'color' => [140, 74, 42], 'text' => "Кофе\nEthiopia", 'description' => 'Светлая обжарка, цветочный аромат и цитрусовое послевкусие. Подходит для пуровера и эспрессо.'],
+            ['sku' => 'TEA-SEN-1', 'slug' => 'sencha-green', 'name' => 'Зелёный чай сенча', 'category' => 'coffee-tea', 'price' => 520, 'old_price' => null, 'qty' => 18, 'images' => 2, 'color' => [46, 110, 72], 'text' => "Чай\nсенча", 'description' => 'Японская сенча с травянистым вкусом. Заваривается при 75 °C, 50 г хватает примерно на 20 чашек.'],
+            ['sku' => 'CUP-CER-1', 'slug' => 'ceramic-mug', 'name' => 'Керамическая кружка', 'category' => 'tableware', 'price' => 650, 'old_price' => 790, 'qty' => 30, 'images' => 4, 'color' => [176, 92, 80], 'text' => "Кружка", 'description' => 'Объём 350 мл, глазурь, удобная ручка. Можно в посудомойку и микроволновку.'],
+            ['sku' => 'FP-800', 'slug' => 'french-press', 'name' => 'Френч-пресс 800 мл', 'category' => 'tableware', 'price' => 1490, 'old_price' => null, 'qty' => 12, 'images' => 2, 'color' => [70, 90, 110], 'text' => "Френч-\nпресс", 'description' => 'Боросиликатное стекло и стальной фильтр. На 3–4 чашки, подходит для кофе и листового чая.'],
+            ['sku' => 'CH-70', 'slug' => 'dark-chocolate', 'name' => 'Горький шоколад 70%', 'category' => 'sweets', 'price' => 280, 'old_price' => null, 'qty' => 40, 'images' => 1, 'color' => [92, 52, 40], 'text' => "Шоколад", 'description' => 'Плитка 80 г из какао-бобов. Горький вкус без лишней сладости, хорошо к эспрессо.'],
+            ['sku' => 'HN-FL', 'slug' => 'flower-honey', 'name' => 'Мёд цветочный 500 г', 'category' => 'sweets', 'price' => 740, 'old_price' => 820, 'qty' => 16, 'images' => 3, 'color' => [196, 140, 40], 'text' => "Мёд", 'description' => 'Сборный цветочный мёд в стеклянной банке. Густой, с лёгким луговым ароматом.'],
+            ['sku' => 'GR-HND', 'slug' => 'hand-grinder', 'name' => 'Кофемолка ручная', 'category' => 'accessories', 'price' => 2390, 'old_price' => 2690, 'qty' => 3, 'images' => 2, 'color' => [90, 90, 96], 'text' => "Кофемолка", 'description' => 'Стальные жернова и регулировка помола. Для эспрессо, воронки и френч-пресса.'],
+            ['sku' => 'SYR-VN', 'slug' => 'vanilla-syrup', 'name' => 'Сироп ванильный', 'category' => 'accessories', 'price' => 430, 'old_price' => null, 'qty' => 22, 'images' => 5, 'color' => [214, 176, 120], 'text' => "Сироп", 'description' => 'Бутылка 250 мл для кофе и десертов. Густой ванильный вкус, без искусственного послевкусия.'],
         ];
 
         foreach ($products as $index => $item) {
@@ -85,7 +85,7 @@ return new class extends Migration
                 'category_id' => $ids[$item['category']],
                 'name' => $item['name'],
                 'sku' => $item['sku'],
-                'description' => $item['name'].' — тестовый товар для демонстрации каталога, корзины и галереи.',
+                'description' => $item['description'],
                 'price' => $item['price'],
                 'old_price' => $item['old_price'],
                 'quantity' => $item['qty'],

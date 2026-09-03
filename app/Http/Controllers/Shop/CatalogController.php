@@ -42,7 +42,7 @@ class CatalogController extends Controller
     public function category(string $slug)
     {
         $category = Category::query()->active()->where('slug', $slug)->firstOrFail();
-        $products = $category->products()->active()->with('attachment')->ordered()->paginate(12);
+        $products = $category->products()->active()->with(['category', 'attachment'])->ordered()->paginate(12);
 
         return Storefront::respond('shop.category', 'Category', compact('category', 'products'), [
             'category' => ShopPayload::category($category),
@@ -60,7 +60,7 @@ class CatalogController extends Controller
 
         $related = Product::query()
             ->active()
-            ->with('attachment')
+            ->with(['category', 'attachment'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->ordered()
