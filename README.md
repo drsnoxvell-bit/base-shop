@@ -21,16 +21,10 @@
 
 Нужен **запущенный Docker Desktop** (кит в трее не анимируется, статус Running).
 
-В **пустой** папке сайта. Не используйте `irm | iex` (PowerShell 5.1 ломает кодировку). Скачайте файл и запустите его. Папка может содержать сам `install.ps1` — установщик скачает проект во временный каталог.
+В папке сайта. Не используйте `irm | iex` и не используйте `Invoke-WebRequest` (PowerShell 5.1 подставляет старый файл из кэша). Скачайте через `curl.exe`. В папке может лежать сам `install.ps1`.
 
 ```powershell
-cd C:\OSPanel\home\mysite
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/drsnoxvell-bit/base-shop/main/install.ps1 -OutFile install.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
-```
-
-```powershell
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/drsnoxvell-bit/base-shop/main/install.ps1 -OutFile install.ps1
+curl.exe -fsSL -o install.ps1 https://raw.githubusercontent.com/drsnoxvell-bit/base-shop/main/install.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
 

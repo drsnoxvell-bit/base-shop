@@ -70,6 +70,7 @@ function Invoke-ShopInstall {
     }
 }
 
+Write-Host 'Installer v2 (downloads into .shop-stage)...'
 Assert-Docker
 Install-Project
 Invoke-Setup
