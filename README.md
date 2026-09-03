@@ -52,6 +52,17 @@ npm run build
 
 Демо-товары и категории создаются миграцией `2026_09_03_100004_seed_shop_demo_data`.
 
-## Обновления Laravel и Orchid
+## Публикация в GitHub
+
+Локальный репозиторий уже инициализирован, тег `v1.0.0` создан. Чтобы залить приватный репозиторий:
+
+```bash
+git remote add origin https://github.com/drsnoxvell-bit/base-shop.git
+git push -u origin master
+git push origin v1.0.0
+```
+
+Репозиторий `base-shop` нужно заранее создать в аккаунте [drsnoxvell-bit](https://github.com/drsnoxvell-bit) (Private).
+
 
 См. [docs/UPGRADE.md](docs/UPGRADE.md). Коротко: внутри текущего мажора — `composer update`, шаблоны Orchid не копируются в проект, витрина живёт в своих Blade/CSS.

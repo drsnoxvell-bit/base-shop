@@ -8,23 +8,13 @@ use Illuminate\Validation\ValidationException;
 
 class ProductService
 {
-    public function save(Product $product, array $data, array $attachmentIds = []): Product
+    public function save(Product $product, array $data): Product
     {
         if (blank($data['slug'] ?? null) && filled($data['name'] ?? null)) {
             $data['slug'] = $this->uniqueSlug($data['name'], $product->id);
         }
 
         $product->fill($data)->save();
-
-        if ($attachmentIds !== []) {
-            $product->attachment()->syncWithoutDetaching($attachmentIds);
-        } elseif (array_key_exists('attachment', $data) === false && $attachmentIds === []) {
-            // no-op
-        }
-
-        if (array_key_exists('_attachments', $data)) {
-            $product->attachment()->sync($data['_attachments'] ?? []);
-        }
 
         return $product->refresh();
     }
