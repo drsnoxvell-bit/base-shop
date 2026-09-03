@@ -29,10 +29,10 @@ composer install
 php artisan shop:install
 ```
 
-Либо `composer create-project`. В **PowerShell** не используйте `\"` и не ставьте `\` в конце строки:
+Либо `composer create-project`. В PowerShell **не передавайте JSON**: `composer.bat` съедает кавычки. Достаточно URL:
 
 ```powershell
-composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository='{"type":"vcs","url":"https://github.com/drsnoxvell-bit/base-shop.git"}'
+composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository=https://github.com/drsnoxvell-bit/base-shop.git
 ```
 
 Если `composer` пишет `Could not open input file: \composer.phar`, это сломанный `composer.bat` OSPanel (`COMPOSER_HOME` пустой). Вызовите рабочий Composer:
