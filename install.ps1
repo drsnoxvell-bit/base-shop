@@ -26,15 +26,27 @@ function Assert-Docker {
 
 function Install-Project {
     if ((Test-Path (Join-Path $Root 'docker-compose.yml')) -and (Test-Path (Join-Path $Root 'artisan'))) {
+        Write-Host 'Project files already present.'
         return
     }
 
-    Write-Host "Downloading $Package..."
-    docker run --rm -v "${Root}:/app" -w /app composer:2 create-project $Package . --stability=dev --ignore-platform-reqs
+    $stage = Join-Path $Root '.shop-stage'
+    if (Test-Path $stage) {
+        Remove-Item $stage -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $stage | Out-Null
+
+    Write-Host "Downloading $Package (folder may contain install.ps1)..."
+    docker run --rm -v "${stage}:/app" -w /app composer:2 create-project $Package . --stability=dev --ignore-platform-reqs
     if ($LASTEXITCODE -ne 0) {
-        Write-Host 'Download failed. Use an empty folder.'
+        Write-Host 'Download failed.'
         exit 1
     }
+
+    Get-ChildItem -LiteralPath $stage -Force | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $Root $_.Name) -Recurse -Force
+    }
+    Remove-Item -LiteralPath $stage -Recurse -Force
 }
 
 function Invoke-Setup {

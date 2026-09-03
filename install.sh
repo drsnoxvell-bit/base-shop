@@ -18,11 +18,17 @@ assert_docker() {
 
 install_project() {
     if [ -f docker-compose.yml ] && [ -f artisan ]; then
+        echo "Project files already present."
         return
     fi
-    echo "Скачиваю ${package}..."
-    docker run --rm -u "$(id -u):$(id -g)" -v "$root":/app -w /app composer:2 \
+    stage="$root/.shop-stage"
+    rm -rf "$stage"
+    mkdir -p "$stage"
+    echo "Downloading ${package}..."
+    docker run --rm -u "$(id -u):$(id -g)" -v "$stage":/app -w /app composer:2 \
         create-project "$package" . --stability=dev --ignore-platform-reqs
+    find "$stage" -mindepth 1 -maxdepth 1 -exec cp -a {} "$root/" \;
+    rm -rf "$stage"
 }
 
 assert_docker
