@@ -20,8 +20,25 @@
 
 Репозиторий публичный. Клонировать и ставить может кто угодно; **писать в этот репозиторий может только владелец**. Свои правки — через форк и pull request. Rebase и слияние делает владелец.
 
+Проще всего клонировать репозиторий (так надёжнее в Windows PowerShell):
+
 ```bash
-composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository="{\"type\":\"vcs\",\"url\":\"https://github.com/drsnoxvell-bit/base-shop.git\"}"
+git clone https://github.com/drsnoxvell-bit/base-shop.git my-shop
+cd my-shop
+composer install
+php artisan shop:install
+```
+
+Либо `composer create-project`. В **PowerShell** не используйте `\"` и не ставьте `\` в конце строки:
+
+```powershell
+composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository='{"type":"vcs","url":"https://github.com/drsnoxvell-bit/base-shop.git"}'
+```
+
+Если `composer` пишет `Could not open input file: \composer.phar`, это сломанный `composer.bat` OSPanel (`COMPOSER_HOME` пустой). Вызовите рабочий Composer:
+
+```powershell
+& "C:\ProgramData\ComposerSetup\bin\composer.bat" install
 ```
 
 После копирования файлов запустится `php artisan shop:install`. Выберите стек:
