@@ -18,21 +18,30 @@
 
 ## Установка
 
-В пустой каталог сайта (например `C:\OSPanel\home\mysite`):
+Пакет пока **не на Packagist**, поэтому `composer create-project drsnoxvell-bit/base-shop` без репозитория пишет `Could not find package ... stability stable`. Сначала один раз укажите GitHub (это не clone, Composer сам скачает архив):
 
 ```powershell
-composer create-project drsnoxvell-bit/base-shop .
+composer config -g repositories.base-shop vcs https://github.com/drsnoxvell-bit/base-shop.git
+```
+
+Потом в **пустой** папке сайта:
+
+```powershell
+cd C:\OSPanel\home\mysite
+composer create-project drsnoxvell-bit/base-shop . --stability=dev
 php artisan shop:install
 ```
 
-Или в новую папку рядом:
+Или в новую папку:
 
 ```powershell
 cd C:\OSPanel\home
-composer create-project drsnoxvell-bit/base-shop my-shop
+composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev
 cd my-shop
 php artisan shop:install
 ```
+
+`--stability=dev` обязателен: на GitHub есть ветка `main`, а не стабильный релиз на Packagist. Команды запускайте **по одной** — `php artisan` только после успешного `create-project`.
 
 1. Composer скачает проект и зависимости, создаст `.env`, ключ приложения.
 2. `php artisan shop:install` — выберите стек **1–5**, миграции, администратор, `npm`.
@@ -50,21 +59,14 @@ DB_PASSWORD=
 Если `composer` пишет `Could not open input file: \composer.phar`, это сломанный `composer.bat` OSPanel. Вызовите:
 
 ```powershell
-& "C:\ProgramData\ComposerSetup\bin\composer.bat" create-project drsnoxvell-bit/base-shop .
+& "C:\ProgramData\ComposerSetup\bin\composer.bat" create-project drsnoxvell-bit/base-shop . --stability=dev
 ```
 
-### Пока пакет ещё не на Packagist
-
-Без публикации на [Packagist](https://packagist.org/packages/submit) Composer не знает имя `drsnoxvell-bit/base-shop`. Один раз укажите GitHub как источник (без JSON, работает в PowerShell):
+Когда владелец опубликует пакет на [Packagist](https://packagist.org/packages/submit), достаточно будет:
 
 ```powershell
-composer config -g repositories.base-shop vcs https://github.com/drsnoxvell-bit/base-shop.git
-composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev
-cd my-shop
-php artisan shop:install
+composer create-project drsnoxvell-bit/base-shop my-shop
 ```
-
-После публикации на Packagist достаточно `composer create-project drsnoxvell-bit/base-shop my-shop`.
 
 Стек витрины:
 
