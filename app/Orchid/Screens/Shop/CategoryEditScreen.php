@@ -6,6 +6,7 @@ namespace App\Orchid\Screens\Shop;
 
 use App\Models\Category;
 use App\Orchid\Layouts\Shop\CategoryEditLayout;
+use App\Support\ShopPermissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -16,6 +17,11 @@ use Orchid\Support\Facades\Toast;
 class CategoryEditScreen extends Screen
 {
     public ?Category $category = null;
+
+    public function permission(): ?iterable
+    {
+        return [ShopPermissions::CATEGORIES];
+    }
 
     public function query(Category $category): iterable
     {

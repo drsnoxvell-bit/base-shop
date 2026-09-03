@@ -8,6 +8,7 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Orchid\Layouts\Shop\OrderEditLayout;
 use App\Services\Shop\OrderService;
+use App\Support\ShopPermissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Orchid\Screen\Actions\Button;
@@ -19,6 +20,11 @@ use Orchid\Support\Facades\Toast;
 class OrderEditScreen extends Screen
 {
     public ?Order $order = null;
+
+    public function permission(): ?iterable
+    {
+        return [ShopPermissions::ORDERS];
+    }
 
     public function query(Order $order): iterable
     {

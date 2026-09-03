@@ -6,6 +6,7 @@ namespace App\Orchid\Screens\Shop;
 
 use App\Models\Category;
 use App\Orchid\Layouts\Shop\CategoryListLayout;
+use App\Support\ShopPermissions;
 use Illuminate\Http\Request;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Screen;
@@ -13,6 +14,11 @@ use Orchid\Support\Facades\Toast;
 
 class CategoryListScreen extends Screen
 {
+    public function permission(): ?iterable
+    {
+        return [ShopPermissions::CATEGORIES];
+    }
+
     public function query(): iterable
     {
         return [

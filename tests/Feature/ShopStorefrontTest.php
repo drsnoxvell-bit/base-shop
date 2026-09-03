@@ -35,7 +35,10 @@ class ShopStorefrontTest extends TestCase
         $this->post(route('shop.cart.add', $product), ['qty' => 2])->assertRedirect();
         $this->get(route('shop.cart'))->assertOk()->assertSee($product->name);
 
-        $this->patch(route('shop.cart.update', $product), ['qty' => 1])->assertRedirect();
+        $this->patchJson(route('shop.cart.update', $product), ['qty' => 3])
+            ->assertOk()
+            ->assertJsonPath('count', 3)
+            ->assertJsonPath('lines.0.qty', 3);
         $this->post(route('shop.cart.recalculate'))->assertRedirect();
 
         $this->get(route('shop.checkout'))->assertOk();
@@ -55,5 +58,12 @@ class ShopStorefrontTest extends TestCase
     public function test_admin_login_page_is_available(): void
     {
         $this->get('/admin/login')->assertOk();
+    }
+
+    public function test_api_home_returns_json(): void
+    {
+        $this->getJson('/api/shop/home')
+            ->assertOk()
+            ->assertJsonStructure(['site', 'categories', 'products']);
     }
 }

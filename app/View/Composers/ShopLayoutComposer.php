@@ -19,5 +19,6 @@ class ShopLayoutComposer
         $view->with('shopSite', $this->settings->site());
         $view->with('cartCount', $this->cart->count());
         $view->with('navCategories', Category::query()->active()->ordered()->get());
+        $view->with('authUser', auth()->user());
     }
 }

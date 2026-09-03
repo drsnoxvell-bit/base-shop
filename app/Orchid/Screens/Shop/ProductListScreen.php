@@ -7,6 +7,7 @@ namespace App\Orchid\Screens\Shop;
 use App\Models\Product;
 use App\Orchid\Layouts\Shop\ProductListLayout;
 use App\Services\Shop\ProductService;
+use App\Support\ShopPermissions;
 use Illuminate\Http\Request;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Screen;
@@ -14,6 +15,11 @@ use Orchid\Support\Facades\Toast;
 
 class ProductListScreen extends Screen
 {
+    public function permission(): ?iterable
+    {
+        return [ShopPermissions::PRODUCTS];
+    }
+
     public function query(): iterable
     {
         return [

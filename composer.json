@@ -8,8 +8,11 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
+        "laravel/socialite": "^5.31",
         "laravel/tinker": "^2.10.1",
-        "orchid/platform": "^14.0"
+        "orchid/platform": "^14.0",
+        "socialiteproviders/vkontakte": "^5.1",
+        "socialiteproviders/yandex": "^4.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -51,9 +54,8 @@
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
             "@php artisan orchid:publish --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan storage:link --ansi",
-            "@php artisan migrate --graceful --ansi"
+            "@php artisan shop:install --ansi"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",

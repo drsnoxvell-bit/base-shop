@@ -31,5 +31,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="SCOUT_DRIVER" value="null"/>
         <env name="FILESYSTEM_DISK" value="public"/>
+        <env name="SHOP_STACK" value="blade"/>
     </php>
 </phpunit>

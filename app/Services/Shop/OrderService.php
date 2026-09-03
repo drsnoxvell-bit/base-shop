@@ -31,6 +31,7 @@ class OrderService
 
         $order = DB::transaction(function () use ($customer, $summary) {
             $order = Order::query()->create([
+                'user_id' => $customer['user_id'] ?? auth()->id(),
                 'number' => $this->makeNumber(),
                 'name' => $customer['name'],
                 'phone' => $customer['phone'],

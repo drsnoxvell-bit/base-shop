@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use App\Support\ShopPermissions;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Orchid\Filters\Types\Like;
 use Orchid\Filters\Types\Where;
 use Orchid\Filters\Types\WhereDateStartEnd;
+use Orchid\Platform\Models\Role;
 use Orchid\Platform\Models\User as Authenticatable;
 
 class User extends Authenticatable
 {
+    use HasFactory;
     /**
      * The attributes that are mass assignable.
      *
@@ -37,8 +42,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'permissions'          => 'array',
-        'email_verified_at'    => 'datetime',
+        'permissions' => 'array',
+        'email_verified_at' => 'datetime',
     ];
 
     /**
@@ -47,11 +52,11 @@ class User extends Authenticatable
      * @var array
      */
     protected $allowedFilters = [
-           'id'         => Where::class,
-           'name'       => Like::class,
-           'email'      => Like::class,
-           'updated_at' => WhereDateStartEnd::class,
-           'created_at' => WhereDateStartEnd::class,
+        'id' => Where::class,
+        'name' => Like::class,
+        'email' => Like::class,
+        'updated_at' => WhereDateStartEnd::class,
+        'created_at' => WhereDateStartEnd::class,
     ];
 
     /**
@@ -66,4 +71,33 @@ class User extends Authenticatable
         'updated_at',
         'created_at',
     ];
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function assignShopRole(string $slug): void
+    {
+        $role = Role::query()->where('slug', $slug)->first();
+
+        if ($role) {
+            $this->replaceRoles([$role->id]);
+        }
+    }
+
+    public function hasShopRole(string $slug): bool
+    {
+        return $this->inRole($slug);
+    }
+
+    public function canAccessAdmin(): bool
+    {
+        return $this->hasAccess(ShopPermissions::INDEX);
+    }
 }

@@ -7,6 +7,7 @@ namespace App\Orchid\Screens\Shop;
 use App\Orchid\Layouts\Shop\SettingsMailLayout;
 use App\Orchid\Layouts\Shop\SettingsSiteLayout;
 use App\Services\Shop\SettingService;
+use App\Support\ShopPermissions;
 use Illuminate\Http\Request;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Screen;
@@ -15,6 +16,11 @@ use Orchid\Support\Facades\Toast;
 
 class SettingsScreen extends Screen
 {
+    public function permission(): ?iterable
+    {
+        return [ShopPermissions::SETTINGS];
+    }
+
     public function query(SettingService $settings): iterable
     {
         return [

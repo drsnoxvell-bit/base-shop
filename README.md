@@ -1,68 +1,88 @@
 # Base Shop
 
-Базовый интернет-магазин на Laravel 12 и Orchid 14. Разворачивается как Composer-проект из приватного GitHub-репозитория.
+Базовый интернет-магазин на Laravel 12 и Orchid 14. Один репозиторий, выбор стека витрины при установке.
 
-- Витрина: главная, каталог, категория, карточка с галереей, корзина, оформление заказа
+## Что входит
+
+- Каталог, карточка товара с галереей, корзина, оформление заказа без онлайн-оплаты
 - Админка Orchid: категории, товары, заказы, настройки сайта и SMTP
-- Заказ без онлайн-оплаты (заявка / при получении)
+- Роли: администратор, редактор, пользователь
+- Регистрация, вход, OAuth Яндекс и ВКонтакте
 
 ## Требования
 
 - PHP 8.2+
 - Composer 2
-- Node.js 18+ (для Vite)
-- SQLite или MySQL
+- Node.js 18+
+- MySQL 5.7+ / 8.x
 
-## Установка из GitHub
+## Установка
 
-Репозиторий приватный. Нужен доступ и токен:
-
-```bash
-composer config --global github-oauth.github.com YOUR_GITHUB_TOKEN
-```
-
-Затем:
-
-```bash
-composer create-project drsnoxvell-bit/base-shop my-shop --repository="{\"type\":\"vcs\",\"url\":\"https://github.com/drsnoxvell-bit/base-shop.git\"}"
-```
-
-Если тега ещё нет:
+Репозиторий публичный. Клонировать и ставить может кто угодно; **писать в этот репозиторий может только владелец**. Свои правки — через форк и pull request. Rebase и слияние делает владелец.
 
 ```bash
 composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository="{\"type\":\"vcs\",\"url\":\"https://github.com/drsnoxvell-bit/base-shop.git\"}"
 ```
 
-## Локальная настройка (OSPanel)
+После копирования файлов запустится `php artisan shop:install`. Выберите стек:
 
-1. Скопировать `.env.example` в `.env` при необходимости
-2. Указать `APP_URL` (например `http://baseLaravelShop`) и базу
-3. Команды:
+1. Blade — шаблоны Laravel, без Vue/React
+2. Inertia + Vue — монолит Laravel + Vue
+3. Inertia + React — монолит Laravel + React
+4. Laravel API + Vue SPA — бэкенд Laravel и фронт Vue в одном проекте
+5. Laravel API + React SPA — бэкенд Laravel и фронт React в одном проекте
+
+Невыбранные фронты не ставятся: инсталлятор копирует только нужный stub и подключает только нужные Composer/npm пакеты. В установленной копии каталог `stubs/` удаляется (в исходном git-репозитории шаблоны остаются).
+
+Неинтерактивно:
 
 ```bash
-php artisan key:generate
-php artisan storage:link
+php artisan shop:install --stack=blade --no-interaction --skip-admin
+php artisan shop:install --stack=inertia-vue
+php artisan shop:install --stack=spa-react --keep-stubs
+```
+
+Затем:
+
+```bash
+# .env: APP_URL, MySQL, ключи OAuth при необходимости
 php artisan migrate
+php artisan db:seed --class=Database\\Seeders\\RoleSeeder
 php artisan orchid:admin
 npm install
 npm run build
 ```
 
-Админка: `/admin`
+Админка: `/admin`. Витрина: `/`.
 
-Демо-товары и категории создаются миграцией `2026_09_03_100004_seed_shop_demo_data`.
+## OAuth Яндекс и ВКонтакте
 
-## Публикация в GitHub
+В кабинете приложения укажите callback:
 
-Локальный репозиторий уже инициализирован, тег `v1.0.0` создан. Чтобы залить приватный репозиторий:
+- `{APP_URL}/auth/yandex/callback`
+- `{APP_URL}/auth/vkontakte/callback`
 
-```bash
-git remote add origin https://github.com/drsnoxvell-bit/base-shop.git
-git push -u origin master
-git push origin v1.0.0
+В `.env`:
+
+```
+YANDEX_CLIENT_ID=
+YANDEX_CLIENT_SECRET=
+VKONTAKTE_CLIENT_ID=
+VKONTAKTE_CLIENT_SECRET=
 ```
 
-Репозиторий `base-shop` нужно заранее создать в аккаунте [drsnoxvell-bit](https://github.com/drsnoxvell-bit) (Private).
+Если пользователя ещё нет, он создаётся с ролью «пользователь». Если email совпал — вход привязывается к существующему аккаунту. Если ВК не отдал email, создаётся технический адрес `vkontakte-{id}@users.local`.
 
+## Роли
 
-См. [docs/UPGRADE.md](docs/UPGRADE.md). Коротко: внутри текущего мажора — `composer update`, шаблоны Orchid не копируются в проект, витрина живёт в своих Blade/CSS.
+- **Администратор** — каталог, заказы, настройки, пользователи и роли
+- **Редактор** — категории, товары, заказы (без настроек и пользователей)
+- **Пользователь** — витрина, профиль и свои заказы, без `/admin`
+
+Регистрация и соцсети всегда создают роль «пользователь».
+
+## Вклад в upstream
+
+Публичный репозиторий только для чтения у всех, кроме владельца [drsnoxvell-bit](https://github.com/drsnoxvell-bit). `git push` в origin у установщика будет отклонён. Не добавляйте коллабораторов с правом Write.
+
+См. [docs/UPGRADE.md](docs/UPGRADE.md).

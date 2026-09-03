@@ -7,6 +7,7 @@ namespace App\Orchid\Screens\Shop;
 use App\Models\Product;
 use App\Orchid\Layouts\Shop\ProductEditLayout;
 use App\Services\Shop\ProductService;
+use App\Support\ShopPermissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Orchid\Screen\Actions\Button;
@@ -16,6 +17,11 @@ use Orchid\Support\Facades\Toast;
 class ProductEditScreen extends Screen
 {
     public ?Product $product = null;
+
+    public function permission(): ?iterable
+    {
+        return [ShopPermissions::PRODUCTS];
+    }
 
     public function query(Product $product): iterable
     {

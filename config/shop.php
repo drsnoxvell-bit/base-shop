@@ -10,4 +10,8 @@ return [
 
     'order_prefix' => 'ORD',
 
+    'stack' => env('SHOP_STACK', 'blade'),
+
+    'social_providers' => ['yandex', 'vkontakte'],
+
 ];

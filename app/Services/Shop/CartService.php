@@ -135,6 +135,24 @@ class CartService
         ];
     }
 
+    public function json(): array
+    {
+        $summary = $this->recalculate();
+
+        return [
+            'count' => $summary['count'],
+            'total' => $summary['total'],
+            'total_formatted' => shop_money($summary['total']),
+            'empty' => $summary['count'] < 1,
+            'lines' => $summary['lines']->map(fn (array $line) => [
+                'id' => $line['product']->id,
+                'qty' => $line['qty'],
+                'max' => $line['product']->quantity,
+                'sum_formatted' => shop_money($line['sum']),
+            ])->values()->all(),
+        ];
+    }
+
     public function count(): int
     {
         return (int) array_sum($this->raw());

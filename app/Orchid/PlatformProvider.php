@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Orchid;
 
+use App\Support\ShopPermissions;
 use Orchid\Platform\Dashboard;
 use Orchid\Platform\ItemPermission;
 use Orchid\Platform\OrchidServiceProvider;
@@ -22,31 +23,35 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make('Категории')
                 ->icon('bs.folder')
                 ->route('platform.shop.categories')
+                ->permission(ShopPermissions::CATEGORIES)
                 ->title('Магазин'),
 
             Menu::make('Товары')
                 ->icon('bs.box-seam')
-                ->route('platform.shop.products'),
+                ->route('platform.shop.products')
+                ->permission(ShopPermissions::PRODUCTS),
 
             Menu::make('Заказы')
                 ->icon('bs.bag-check')
-                ->route('platform.shop.orders'),
+                ->route('platform.shop.orders')
+                ->permission(ShopPermissions::ORDERS),
 
             Menu::make('Настройки')
                 ->icon('bs.gear')
                 ->route('platform.shop.settings')
+                ->permission(ShopPermissions::SETTINGS)
                 ->divider(),
 
             Menu::make(__('Users'))
                 ->icon('bs.people')
                 ->route('platform.systems.users')
-                ->permission('platform.systems.users')
+                ->permission(ShopPermissions::USERS)
                 ->title(__('Access Controls')),
 
             Menu::make(__('Roles'))
                 ->icon('bs.shield')
                 ->route('platform.systems.roles')
-                ->permission('platform.systems.roles'),
+                ->permission(ShopPermissions::ROLES),
         ];
     }
 
@@ -54,8 +59,13 @@ class PlatformProvider extends OrchidServiceProvider
     {
         return [
             ItemPermission::group(__('System'))
-                ->addPermission('platform.systems.roles', __('Roles'))
-                ->addPermission('platform.systems.users', __('Users')),
+                ->addPermission(ShopPermissions::ROLES, __('Roles'))
+                ->addPermission(ShopPermissions::USERS, __('Users')),
+            ItemPermission::group('Магазин')
+                ->addPermission(ShopPermissions::CATEGORIES, 'Категории')
+                ->addPermission(ShopPermissions::PRODUCTS, 'Товары')
+                ->addPermission(ShopPermissions::ORDERS, 'Заказы')
+                ->addPermission(ShopPermissions::SETTINGS, 'Настройки'),
         ];
     }
 }

@@ -6,8 +6,9 @@
 
 - В `composer.json` caret-ограничения: `laravel/framework: ^12.0`, `orchid/platform: ^14.0`
 - Нельзя править `vendor/` и публиковать Blade Orchid в `resources/views/vendor/platform`
-- Витрина изолирована: `resources/views/shop`, `resources/css/app.css`, `app/Services/Shop`
+- Витрина изолирована: `resources/views/shop` или stub Inertia/SPA, `resources/css/app.css`, `app/Services/Shop`
 - Админка — только Screens / Layouts / `PlatformProvider`
+- Стек витрины выбирается `php artisan shop:install`, лишние npm-пакеты не ставятся
 - После `composer update` автоматически выполняются `orchid:publish` и `view:clear`
 
 ## Минорное обновление (патчи 12.x / 14.x)
