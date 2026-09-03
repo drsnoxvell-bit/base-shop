@@ -20,19 +20,22 @@
 
 Репозиторий публичный. Клонировать и ставить может кто угодно; **писать в этот репозиторий может только владелец**. Свои правки — через форк и pull request. Rebase и слияние делает владелец.
 
-Проще всего клонировать репозиторий (так надёжнее в Windows PowerShell):
+В Windows PowerShell используйте **git clone**. Так стабильнее всего:
 
-```bash
+```powershell
+cd C:\OSPanel\home
 git clone https://github.com/drsnoxvell-bit/base-shop.git my-shop
 cd my-shop
 composer install
+copy .env.example .env
+php artisan key:generate
 php artisan shop:install
 ```
 
-Либо `composer create-project`. В PowerShell **не передавайте JSON**: `composer.bat` съедает кавычки. Достаточно URL:
+`composer create-project --repository=https://github.com/...git` не сработает: Composer считает URL пакетным репозиторием и ищет `packages.json` (404). Нужен JSON с `"type":"vcs"`, а PowerShell/`composer.bat` вырезают кавычки. Если всё же create-project, запускайте через `cmd`:
 
 ```powershell
-composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository=https://github.com/drsnoxvell-bit/base-shop.git
+cmd /c "composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository={\"type\":\"vcs\",\"url\":\"https://github.com/drsnoxvell-bit/base-shop.git\"}"
 ```
 
 Если `composer` пишет `Could not open input file: \composer.phar`, это сломанный `composer.bat` OSPanel (`COMPOSER_HOME` пустой). Вызовите рабочий Composer:
