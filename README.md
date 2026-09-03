@@ -1,6 +1,8 @@
 # Base Shop
 
-Базовый интернет-магазин на Laravel 12 и Orchid 14. Ставится как Composer-проект, без `git clone`.
+Базовый интернет-магазин на Laravel 12 и Orchid 14. Основной способ установки — **Docker** (на компьютере достаточно Docker Desktop). PHP, Composer, Node, npm и MySQL поднимаются контейнерами.
+
+Пакет: [packagist.org/packages/drsnoxvell-bit/base-shop](https://packagist.org/packages/drsnoxvell-bit/base-shop).
 
 ## Что входит
 
@@ -11,52 +13,36 @@
 
 ## Требования
 
-- PHP 8.2+
-- Composer 2
-- Node.js 18+
-- MySQL 5.7+ / 8.x
+- Docker Desktop (или Docker Engine + Compose v2)
 
-## Установка
+Локальные PHP, Node, nvm и MySQL **не нужны**.
 
-Пакет на [Packagist](https://packagist.org/packages/drsnoxvell-bit/base-shop). В **пустой** папке сайта:
+## Установка (Docker)
+
+В **пустой** папке сайта:
 
 ```powershell
 cd C:\OSPanel\home\mysite
-composer create-project drsnoxvell-bit/base-shop . --stability=dev
-php artisan shop:install
+docker run --rm -v ${PWD}:/app -w /app composer:2 create-project drsnoxvell-bit/base-shop . --stability=dev --ignore-platform-reqs
+.\docker\setup.ps1
+docker compose exec app php artisan shop:install
 ```
 
-Или в новую папку:
+Linux / macOS:
 
-```powershell
-cd C:\OSPanel\home
-composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev
-cd my-shop
-php artisan shop:install
+```bash
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/app -w /app composer:2 create-project drsnoxvell-bit/base-shop . --stability=dev --ignore-platform-reqs
+bash docker/setup.sh
+docker compose exec app php artisan shop:install
 ```
 
-`--stability=dev` нужен, пока на Packagist нет стабильного тега (есть ветка `main`). Команды запускайте **по одной**: `php artisan` только после успешного `create-project`.
+`setup` спросит версии **PHP** (8.2 / 8.3 / 8.4), **Node** (18 / 20 / 22) и **MySQL** (8.0 / 8.4), запишет их в `.env` и поднимет контейнеры.
 
-1. Composer скачает проект и зависимости, создаст `.env`, ключ приложения.
-2. `php artisan shop:install` — выберите стек **1–5**, миграции, администратор, `npm`.
+Сайт: [http://localhost:8080](http://localhost:8080). Админка: [http://localhost:8080/admin](http://localhost:8080/admin).
 
-В OSPanel модуль MySQL должен быть включён. Если в `.env` останется `DB_HOST=127.0.0.1`, инсталлятор сам переключит на `mysql-8.0`. При желании пропишите до установки:
+`--stability=dev` нужен, пока на Packagist нет стабильного тега (есть ветка `main`). Команды запускайте **по одной**.
 
-```
-APP_URL=http://mysite
-DB_HOST=mysql-8.0
-DB_DATABASE=base_shop
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-Если `composer` пишет `Could not open input file: \composer.phar`, это сломанный `composer.bat` OSPanel. Вызовите:
-
-```powershell
-& "C:\ProgramData\ComposerSetup\bin\composer.bat" create-project drsnoxvell-bit/base-shop . --stability=dev
-```
-
-Стек витрины:
+`php artisan shop:install` — стек витрины **1–5**, миграции, администратор, npm.
 
 1. Blade — шаблоны Laravel, без Vue/React
 2. Inertia + Vue — монолит Laravel + Vue
@@ -64,17 +50,42 @@ DB_PASSWORD=
 4. Laravel API + Vue SPA
 5. Laravel API + React SPA
 
-Невыбранные фронты не ставятся. В установленной копии каталог `stubs/` удаляется.
+Невыбранные фронты не ставятся.
 
 Неинтерактивно:
 
 ```powershell
-php artisan shop:install --stack=1
-php artisan shop:install --stack=3
-php artisan shop:install --stack=blade --no-interaction --skip-admin
+docker compose exec app php artisan shop:install --stack=1
+docker compose exec app php artisan shop:install --stack=3
 ```
 
-Админка: `/admin`. Витрина: `/`.
+### Смена версий
+
+В `.env` измените `PHP_VERSION`, `NODE_VERSION` или `MYSQL_VERSION` и пересоберите:
+
+```powershell
+docker compose build --no-cache app
+docker compose up -d
+```
+
+Либо снова запустите `.\docker\setup.ps1` / `docker/setup.sh`.
+
+## Запасной путь: OSPanel / локальный PHP
+
+Если Docker не используете:
+
+```powershell
+composer create-project drsnoxvell-bit/base-shop . --stability=dev
+php artisan shop:install
+```
+
+Нужны PHP 8.2+, Composer 2, Node.js 18+, MySQL. В OSPanel модуль MySQL должен быть включён; инсталлятор сам поставит `DB_HOST=mysql-8.0`, если `127.0.0.1` недоступен.
+
+Если `composer` пишет `Could not open input file: \composer.phar`:
+
+```powershell
+& "C:\ProgramData\ComposerSetup\bin\composer.bat" create-project drsnoxvell-bit/base-shop . --stability=dev
+```
 
 Это **скелет приложения** (`type: project`), как Laravel. В уже готовый Laravel его нельзя поставить через `composer require`.
 

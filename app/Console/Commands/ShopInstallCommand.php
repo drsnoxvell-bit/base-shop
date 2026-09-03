@@ -240,17 +240,11 @@ class ShopInstallCommand extends Command
             $this->error('Не удалось выполнить миграции.');
             $this->line($e->getMessage());
             $this->newLine();
-            $this->comment('В OSPanel MySQL не слушает 127.0.0.1. В .env укажите:');
-            $this->line('DB_HOST='.($this->ospanelMysqlHosts()[0] ?? 'mysql-8.0'));
-            $this->line('DB_DATABASE=base_shop');
-            $this->line('DB_USERNAME=root');
-            $this->line('DB_PASSWORD=');
-            $this->newLine();
-            $this->comment('Модуль MySQL в панели должен быть запущен. Затем:');
+            $this->comment('Docker: DB_HOST=mysql, затем docker compose exec app php artisan migrate');
+            $this->comment('OSPanel: DB_HOST=mysql-8.0, модуль MySQL должен быть запущен.');
             $this->line('php artisan migrate');
             $this->line('php artisan db:seed --class=Database\\Seeders\\RoleSeeder');
             $this->line('php artisan orchid:admin');
-            $this->line('npm install && npm run build');
 
             return false;
         }
@@ -271,6 +265,17 @@ class ShopInstallCommand extends Command
             return;
         }
 
+        $dockerHost = $this->dockerMysqlHost();
+
+        if ($dockerHost && $this->mysqlServerReachable($dockerHost, $username, $password !== '' ? $password : 'secret', $port)) {
+            $password = $password !== '' ? $password : 'secret';
+            $this->warn('Для Docker ставлю DB_HOST='.$dockerHost);
+            $this->ensureSchemaExists($dockerHost, $database, $username, $password, $port);
+            $this->applyDatabaseConfig($dockerHost, $database, $username, $password);
+
+            return;
+        }
+
         $ospanelHost = $this->firstReachableOspanelHost($username, $password, $port);
 
         if ($ospanelHost) {
@@ -282,13 +287,13 @@ class ShopInstallCommand extends Command
         }
 
         if ($this->option('no-interaction')) {
-            $this->warn('MySQL недоступен. Проверьте DB_HOST в .env (для OSPanel: mysql-8.0).');
+            $this->warn('MySQL недоступен. Docker: DB_HOST=mysql. OSPanel: DB_HOST=mysql-8.0.');
 
             return;
         }
 
         $this->warn('Не удалось подключиться к MySQL ('.$host.':'.$port.').');
-        $host = text('Хост MySQL', default: $this->ospanelMysqlHosts()[0] ?? $host);
+        $host = text('Хост MySQL', default: $dockerHost ?: ($this->ospanelMysqlHosts()[0] ?? $host));
         $database = text('Имя базы', default: $database);
         $username = text('Пользователь MySQL', default: $username);
         $password = text('Пароль MySQL (пусто — Enter)', default: $password);
@@ -340,6 +345,17 @@ class ShopInstallCommand extends Command
         } catch (Throwable) {
             return false;
         }
+    }
+
+    private function runningInDocker(): bool
+    {
+        return filter_var(env('SHOP_DOCKER', false), FILTER_VALIDATE_BOOLEAN)
+            || is_file('/.dockerenv');
+    }
+
+    private function dockerMysqlHost(): ?string
+    {
+        return $this->runningInDocker() ? 'mysql' : null;
     }
 
     /**

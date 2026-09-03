@@ -9,9 +9,21 @@
 - Витрина изолирована: `resources/views/shop` или stub Inertia/SPA, `resources/css/app.css`, `app/Services/Shop`
 - Админка — только Screens / Layouts / `PlatformProvider`
 - Стек витрины выбирается `php artisan shop:install`, лишние npm-пакеты не ставятся
+- Основной запуск — Docker (`docker compose`), версии PHP/Node/MySQL в `.env`
 - После `composer update` автоматически выполняются `orchid:publish` и `view:clear`
 
 ## Минорное обновление (патчи 12.x / 14.x)
+
+Docker:
+
+```bash
+docker compose exec app composer update
+docker compose exec app npm install
+docker compose exec app npm run build
+docker compose exec app php artisan migrate
+```
+
+Локально (OSPanel):
 
 ```bash
 composer update
@@ -25,6 +37,7 @@ php artisan about
 
 ```bash
 php artisan test
+# или: docker compose exec app php artisan test
 ```
 
 ## Мажорное обновление
