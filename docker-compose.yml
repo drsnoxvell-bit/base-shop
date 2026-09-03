@@ -1,0 +1,61 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.3}
+        NODE_VERSION: ${NODE_VERSION:-22}
+        COMPOSER_VERSION: ${COMPOSER_VERSION:-2}
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-base_shop}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      SHOP_DOCKER: "1"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - shop
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - shop
+
+  mysql:
+    image: mysql:${MYSQL_VERSION:-8.0}
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-base_shop}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "${FORWARD_DB_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_PASSWORD:-secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - shop
+
+volumes:
+  mysql_data:
+
+networks:
+  shop:
+    driver: bridge

@@ -17,30 +17,33 @@
 
 Локальные PHP, Node, nvm и MySQL **не нужны**.
 
-## Установка (Docker)
+## Установка
 
-В **пустой** папке сайта:
+Нужен **запущенный Docker Desktop** (кит в трее не анимируется, статус Running).
+
+В **пустой** папке сайта — одна команда:
 
 ```powershell
 cd C:\OSPanel\home\mysite
-docker run --rm -v ${PWD}:/app -w /app composer:2 create-project drsnoxvell-bit/base-shop . --stability=dev --ignore-platform-reqs
-.\docker\setup.ps1
-docker compose exec app php artisan shop:install
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/drsnoxvell-bit/base-shop/main/install.ps1 | iex"
+```
+
+Или скачайте репозиторий и запустите пакетный установщик:
+
+```powershell
+cd C:\OSPanel\home\mysite
+.\install.bat
 ```
 
 Linux / macOS:
 
 ```bash
-docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/app -w /app composer:2 create-project drsnoxvell-bit/base-shop . --stability=dev --ignore-platform-reqs
-bash docker/setup.sh
-docker compose exec app php artisan shop:install
+curl -fsSL https://raw.githubusercontent.com/drsnoxvell-bit/base-shop/main/install.sh | bash
 ```
 
-`setup` спросит версии **PHP** (8.2 / 8.3 / 8.4), **Node** (18 / 20 / 22) и **MySQL** (8.0 / 8.4), запишет их в `.env` и поднимет контейнеры.
+Установщик сам: проверит Docker, скачает проект, спросит версии PHP / Node / MySQL, поднимет контейнеры и запустит `shop:install` (стек витрины 1–5).
 
 Сайт: [http://localhost:8080](http://localhost:8080). Админка: [http://localhost:8080/admin](http://localhost:8080/admin).
-
-`--stability=dev` нужен, пока на Packagist нет стабильного тега (есть ветка `main`). Команды запускайте **по одной**.
 
 `php artisan shop:install` — стек витрины **1–5**, миграции, администратор, npm.
 
@@ -68,7 +71,7 @@ docker compose build --no-cache app
 docker compose up -d
 ```
 
-Либо снова запустите `.\docker\setup.ps1` / `docker/setup.sh`.
+Либо снова запустите `.\install.bat` / `bash install.sh`.
 
 ## Запасной путь: OSPanel / локальный PHP
 
