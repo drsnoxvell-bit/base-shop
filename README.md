@@ -21,17 +21,18 @@
 
 Нужен **запущенный Docker Desktop** (кит в трее не анимируется, статус Running).
 
-В **пустой** папке сайта — одна команда:
+В **пустой** папке сайта. Не используйте `irm | iex` (PowerShell 5.1 ломает кодировку). Скачайте файл и запустите его:
 
 ```powershell
 cd C:\OSPanel\home\mysite
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/drsnoxvell-bit/base-shop/main/install.ps1 | iex"
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/drsnoxvell-bit/base-shop/main/install.ps1 -OutFile install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-Или скачайте репозиторий и запустите пакетный установщик:
+Если репозиторий уже на диске:
 
 ```powershell
-cd C:\OSPanel\home\mysite
+cd C:\OSPanel\home\baseLaravelShop
 .\install.bat
 ```
 

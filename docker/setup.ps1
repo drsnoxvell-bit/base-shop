@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
@@ -16,7 +16,7 @@ function Assert-Docker {
         }
     } catch {
     }
-    Write-Host 'Docker не запущен. Откройте Docker Desktop, дождитесь Running и повторите установку: .\install.bat'
+    Write-Host 'Docker is not running. Start Docker Desktop (status Running), then run install.bat again.'
     exit 1
 }
 
@@ -31,16 +31,17 @@ function Set-EnvValue([string]$Key, [string]$Value) {
     } else {
         $content = $content.TrimEnd() + "`n$Key=$Value`n"
     }
-    [System.IO.File]::WriteAllText($file, $content)
+    $utf8 = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($file, $content, $utf8)
 }
 
 function Choose-Version([string]$Label, [string[]]$Options, [string]$Default) {
     Write-Host $Label
     for ($i = 0; $i -lt $Options.Length; $i++) {
-        $mark = if ($Options[$i] -eq $Default) { ' (по умолчанию)' } else { '' }
+        $mark = if ($Options[$i] -eq $Default) { ' (default)' } else { '' }
         Write-Host ("  {0}. {1}{2}" -f ($i + 1), $Options[$i], $mark)
     }
-    $answer = Read-Host "Номер [1-$($Options.Length)]"
+    $answer = Read-Host ("Number [1-{0}]" -f $Options.Length)
     if ([string]::IsNullOrWhiteSpace($answer)) {
         return $Default
     }
@@ -56,10 +57,10 @@ function Choose-Version([string]$Label, [string[]]$Options, [string]$Default) {
 
 if (-not (Test-Path '.env')) {
     Copy-Item '.env.example' '.env'
-    Write-Host 'Создан .env из .env.example'
+    Write-Host 'Created .env from .env.example'
 }
 
-Write-Host 'Версии для Docker-стека'
+Write-Host 'Docker stack versions'
 Write-Host ''
 
 $phpVersion = Choose-Version 'PHP' @('8.2', '8.3', '8.4') '8.3'
@@ -82,10 +83,10 @@ Set-EnvValue 'SHOP_DOCKER' 'true'
 
 Write-Host ''
 Write-Host "PHP=$phpVersion  Node=$nodeVersion  MySQL=$mysqlVersion"
-Write-Host 'Собираю контейнеры...'
+Write-Host 'Building containers...'
 
 docker compose up --build -d
 
 Write-Host ''
-Write-Host 'Готово: http://localhost:8080'
-Write-Host 'Дальше: docker compose exec app php artisan shop:install'
+Write-Host 'Shop URL: http://localhost:8080'
+Write-Host 'Next: docker compose exec app php artisan shop:install'

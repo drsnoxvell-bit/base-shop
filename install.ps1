@@ -1,5 +1,4 @@
-#Requires -Version 5.1
-# Установка Base Shop одной командой. Нужен запущенный Docker Desktop.
+﻿#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 $Package = 'drsnoxvell-bit/base-shop'
@@ -7,7 +6,7 @@ $Root = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 Set-Location $Root
 
 function Assert-Docker {
-    Write-Host 'Проверяю Docker...'
+    Write-Host 'Checking Docker...'
     try {
         docker info 1>$null 2>$null
         if ($LASTEXITCODE -eq 0) {
@@ -17,10 +16,10 @@ function Assert-Docker {
     }
 
     Write-Host ''
-    Write-Host 'Docker не запущен. Так ставить нельзя: PHP, MySQL и Node живут в контейнерах.'
-    Write-Host '1. Установите Docker Desktop: https://www.docker.com/products/docker-desktop/'
-    Write-Host '2. Откройте Docker Desktop и дождитесь статуса Running (кит перестанет анимироваться).'
-    Write-Host '3. Снова запустите install.bat или: powershell -File .\install.ps1'
+    Write-Host 'Docker is not running. PHP, MySQL and Node run inside containers.'
+    Write-Host '1. Install Docker Desktop: https://www.docker.com/products/docker-desktop/'
+    Write-Host '2. Start Docker Desktop and wait until status is Running.'
+    Write-Host '3. Run install.bat again (do not use irm | iex).'
     Write-Host ''
     exit 1
 }
@@ -30,10 +29,10 @@ function Install-Project {
         return
     }
 
-    Write-Host "Скачиваю $Package..."
+    Write-Host "Downloading $Package..."
     docker run --rm -v "${Root}:/app" -w /app composer:2 create-project $Package . --stability=dev --ignore-platform-reqs
     if ($LASTEXITCODE -ne 0) {
-        Write-Host 'Не удалось скачать проект. Папка должна быть пустой.'
+        Write-Host 'Download failed. Use an empty folder.'
         exit 1
     }
 }
@@ -41,10 +40,10 @@ function Install-Project {
 function Invoke-Setup {
     $setup = Join-Path $Root 'docker\setup.ps1'
     if (-not (Test-Path $setup)) {
-        Write-Host 'Не найден docker\setup.ps1. Сначала должен успешно завершиться create-project.'
+        Write-Host 'docker\setup.ps1 not found. create-project must finish first.'
         exit 1
     }
-    & $setup
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $setup
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
@@ -52,7 +51,7 @@ function Invoke-Setup {
 
 function Invoke-ShopInstall {
     Write-Host ''
-    Write-Host 'Запускаю php artisan shop:install (стек 1–5, админ, npm)...'
+    Write-Host 'Running php artisan shop:install...'
     docker compose exec -it app php artisan shop:install
     if ($LASTEXITCODE -ne 0) {
         docker compose exec app php artisan shop:install
@@ -65,6 +64,6 @@ Invoke-Setup
 Invoke-ShopInstall
 
 Write-Host ''
-Write-Host 'Готово.'
-Write-Host 'Сайт:    http://localhost:8080'
-Write-Host 'Админка: http://localhost:8080/admin'
+Write-Host 'Done.'
+Write-Host 'Shop:  http://localhost:8080'
+Write-Host 'Admin: http://localhost:8080/admin'
