@@ -2,9 +2,14 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "drsnoxvell-bit/base-shop",
     "type": "project",
-    "description": "Базовый интернет-магазин на Laravel и Orchid. Разворачивается через composer create-project.",
+    "description": "Базовый интернет-магазин на Laravel и Orchid. Установка: composer create-project drsnoxvell-bit/base-shop.",
     "keywords": ["laravel", "orchid", "shop", "ecommerce"],
     "license": "MIT",
+    "homepage": "https://github.com/drsnoxvell-bit/base-shop",
+    "support": {
+        "issues": "https://github.com/drsnoxvell-bit/base-shop/issues",
+        "source": "https://github.com/drsnoxvell-bit/base-shop"
+    },
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
@@ -55,7 +60,7 @@
             "@php artisan key:generate --ansi",
             "@php artisan orchid:publish --ansi",
             "@php artisan storage:link --ansi",
-            "@php artisan shop:install --ansi"
+            "@php -r \"fwrite(STDOUT, PHP_EOL.'Дальше: php artisan shop:install'.PHP_EOL);\""
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
@@ -64,7 +69,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "12.x-dev"
+            "dev-main": "1.x-dev"
         },
         "laravel": {
             "dont-discover": []

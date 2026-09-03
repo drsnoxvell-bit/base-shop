@@ -6,8 +6,11 @@ use App\Models\User;
 use App\Services\Shop\AuthService;
 use App\Support\ShopStack;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
+use PDO;
+use Throwable;
 
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
@@ -53,13 +56,12 @@ class ShopInstallCommand extends Command
             $this->pruneStubs();
         }
 
-        if (! $this->option('skip-migrate')) {
-            $this->call('migrate', ['--force' => true, '--ansi' => true]);
-            $this->call('db:seed', ['--class' => 'Database\\Seeders\\RoleSeeder', '--force' => true, '--ansi' => true]);
-        }
+        $migrated = $this->migrateAndSeed();
 
-        if (! $this->option('skip-admin')) {
+        if ($migrated && ! $this->option('skip-admin')) {
             $this->createAdministrator($auth);
+        } elseif (! $migrated && ! $this->option('skip-admin')) {
+            $this->comment('Администратор пропущен: сначала поправьте БД, затем php artisan orchid:admin');
         }
 
         if (! $this->option('no-npm')) {
@@ -67,11 +69,10 @@ class ShopInstallCommand extends Command
         }
 
         $this->newLine();
-        $this->info('Готово. Дальше: настройте .env (БД, OAuth) и откройте сайт.');
-        $this->line('Админка: /admin');
+        $this->info($migrated ? 'Готово. Откройте сайт и админку /admin.' : 'Стек установлен, но миграции не выполнены.');
         $this->line('OAuth: YANDEX_CLIENT_ID / VKONTAKTE_CLIENT_ID в .env');
 
-        return self::SUCCESS;
+        return $migrated ? self::SUCCESS : self::FAILURE;
     }
 
     private function resolveStack(): ?string
@@ -221,6 +222,157 @@ class ShopInstallCommand extends Command
             File::deleteDirectory($stubs);
             $this->info('Каталог stubs удалён из установленной копии.');
         }
+    }
+
+    private function migrateAndSeed(): bool
+    {
+        if ($this->option('skip-migrate')) {
+            return true;
+        }
+
+        try {
+            $this->configureDatabase();
+            $this->call('migrate', ['--force' => true, '--ansi' => true]);
+            $this->call('db:seed', ['--class' => 'Database\\Seeders\\RoleSeeder', '--force' => true, '--ansi' => true]);
+
+            return true;
+        } catch (Throwable $e) {
+            $this->error('Не удалось выполнить миграции.');
+            $this->line($e->getMessage());
+            $this->newLine();
+            $this->comment('В OSPanel MySQL не слушает 127.0.0.1. В .env укажите:');
+            $this->line('DB_HOST='.($this->ospanelMysqlHosts()[0] ?? 'mysql-8.0'));
+            $this->line('DB_DATABASE=base_shop');
+            $this->line('DB_USERNAME=root');
+            $this->line('DB_PASSWORD=');
+            $this->newLine();
+            $this->comment('Модуль MySQL в панели должен быть запущен. Затем:');
+            $this->line('php artisan migrate');
+            $this->line('php artisan db:seed --class=Database\\Seeders\\RoleSeeder');
+            $this->line('php artisan orchid:admin');
+            $this->line('npm install && npm run build');
+
+            return false;
+        }
+    }
+
+    private function configureDatabase(): void
+    {
+        $username = (string) config('database.connections.mysql.username', 'root');
+        $password = (string) config('database.connections.mysql.password', '');
+        $database = (string) config('database.connections.mysql.database', 'base_shop');
+        $port = (int) config('database.connections.mysql.port', 3306);
+        $host = (string) config('database.connections.mysql.host', '127.0.0.1');
+
+        if ($this->mysqlServerReachable($host, $username, $password, $port)) {
+            $this->ensureSchemaExists($host, $database, $username, $password, $port);
+            $this->applyDatabaseConfig($host, $database, $username, $password);
+
+            return;
+        }
+
+        $ospanelHost = $this->firstReachableOspanelHost($username, $password, $port);
+
+        if ($ospanelHost) {
+            $this->warn('127.0.0.1:3306 недоступен. Для OSPanel ставлю DB_HOST='.$ospanelHost);
+            $this->ensureSchemaExists($ospanelHost, $database, $username, $password, $port);
+            $this->applyDatabaseConfig($ospanelHost, $database, $username, $password);
+
+            return;
+        }
+
+        if ($this->option('no-interaction')) {
+            $this->warn('MySQL недоступен. Проверьте DB_HOST в .env (для OSPanel: mysql-8.0).');
+
+            return;
+        }
+
+        $this->warn('Не удалось подключиться к MySQL ('.$host.':'.$port.').');
+        $host = text('Хост MySQL', default: $this->ospanelMysqlHosts()[0] ?? $host);
+        $database = text('Имя базы', default: $database);
+        $username = text('Пользователь MySQL', default: $username);
+        $password = text('Пароль MySQL (пусто — Enter)', default: $password);
+
+        $this->ensureSchemaExists($host, $database, $username, $password, $port);
+        $this->applyDatabaseConfig($host, $database, $username, $password);
+    }
+
+    private function applyDatabaseConfig(string $host, string $database, string $username, string $password): void
+    {
+        $this->writeEnv('DB_HOST', $host);
+        $this->writeEnv('DB_DATABASE', $database);
+        $this->writeEnv('DB_USERNAME', $username);
+        $this->writeEnv('DB_PASSWORD', $password);
+
+        config([
+            'database.connections.mysql.host' => $host,
+            'database.connections.mysql.database' => $database,
+            'database.connections.mysql.username' => $username,
+            'database.connections.mysql.password' => $password,
+        ]);
+
+        DB::purge('mysql');
+    }
+
+    private function ensureSchemaExists(string $host, string $database, string $username, string $password, int $port): void
+    {
+        $name = str_replace('`', '', $database);
+        $pdo = new PDO(
+            sprintf('mysql:host=%s;port=%d', $host, $port),
+            $username,
+            $password,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $pdo->exec('CREATE DATABASE IF NOT EXISTS `'.$name.'` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+    }
+
+    private function mysqlServerReachable(string $host, string $username, string $password, int $port): bool
+    {
+        try {
+            new PDO(
+                sprintf('mysql:host=%s;port=%d', $host, $port),
+                $username,
+                $password,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 3]
+            );
+
+            return true;
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function ospanelMysqlHosts(): array
+    {
+        $modules = 'C:\\OSPanel\\modules';
+
+        if (! is_dir($modules)) {
+            return [];
+        }
+
+        $hosts = [];
+
+        foreach (['MySQL-8.0', 'MySQL-8.2', 'MySQL-8.4', 'MySQL-5.7', 'MariaDB-10.11', 'MariaDB-10.6'] as $module) {
+            if (is_dir($modules.DIRECTORY_SEPARATOR.$module)) {
+                $hosts[] = strtolower($module);
+            }
+        }
+
+        return $hosts;
+    }
+
+    private function firstReachableOspanelHost(string $username, string $password, int $port): ?string
+    {
+        foreach ($this->ospanelMysqlHosts() as $host) {
+            if ($this->mysqlServerReachable($host, $username, $password, $port)) {
+                return $host;
+            }
+        }
+
+        return null;
     }
 
     private function writeEnv(string $key, string $value): void

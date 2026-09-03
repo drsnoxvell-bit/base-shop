@@ -1,6 +1,6 @@
 # Base Shop
 
-Базовый интернет-магазин на Laravel 12 и Orchid 14. Один репозиторий, выбор стека витрины при установке.
+Базовый интернет-магазин на Laravel 12 и Orchid 14. Ставится как Composer-проект, без `git clone`.
 
 ## Что входит
 
@@ -18,63 +18,75 @@
 
 ## Установка
 
-Репозиторий публичный. Клонировать и ставить может кто угодно; **писать в этот репозиторий может только владелец**. Свои правки — через форк и pull request. Rebase и слияние делает владелец.
-
-В Windows PowerShell используйте **git clone**. Так стабильнее всего:
+В пустой каталог сайта (например `C:\OSPanel\home\mysite`):
 
 ```powershell
-cd C:\OSPanel\home
-git clone https://github.com/drsnoxvell-bit/base-shop.git my-shop
-cd my-shop
-composer install
-copy .env.example .env
-php artisan key:generate
+composer create-project drsnoxvell-bit/base-shop .
 php artisan shop:install
 ```
 
-`composer create-project --repository=https://github.com/...git` не сработает: Composer считает URL пакетным репозиторием и ищет `packages.json` (404). Нужен JSON с `"type":"vcs"`, а PowerShell/`composer.bat` вырезают кавычки. Если всё же create-project, запускайте через `cmd`:
+Или в новую папку рядом:
 
 ```powershell
-cmd /c "composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev --repository={\"type\":\"vcs\",\"url\":\"https://github.com/drsnoxvell-bit/base-shop.git\"}"
+cd C:\OSPanel\home
+composer create-project drsnoxvell-bit/base-shop my-shop
+cd my-shop
+php artisan shop:install
 ```
 
-Если `composer` пишет `Could not open input file: \composer.phar`, это сломанный `composer.bat` OSPanel (`COMPOSER_HOME` пустой). Вызовите рабочий Composer:
+1. Composer скачает проект и зависимости, создаст `.env`, ключ приложения.
+2. `php artisan shop:install` — выберите стек **1–5**, миграции, администратор, `npm`.
+
+В OSPanel модуль MySQL должен быть включён. Если в `.env` останется `DB_HOST=127.0.0.1`, инсталлятор сам переключит на `mysql-8.0`. При желании пропишите до установки:
+
+```
+APP_URL=http://mysite
+DB_HOST=mysql-8.0
+DB_DATABASE=base_shop
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Если `composer` пишет `Could not open input file: \composer.phar`, это сломанный `composer.bat` OSPanel. Вызовите:
 
 ```powershell
-& "C:\ProgramData\ComposerSetup\bin\composer.bat" install
+& "C:\ProgramData\ComposerSetup\bin\composer.bat" create-project drsnoxvell-bit/base-shop .
 ```
 
-После копирования файлов запустится `php artisan shop:install`. Введите номер стека:
+### Пока пакет ещё не на Packagist
+
+Без публикации на [Packagist](https://packagist.org/packages/submit) Composer не знает имя `drsnoxvell-bit/base-shop`. Один раз укажите GitHub как источник (без JSON, работает в PowerShell):
+
+```powershell
+composer config -g repositories.base-shop vcs https://github.com/drsnoxvell-bit/base-shop.git
+composer create-project drsnoxvell-bit/base-shop my-shop --stability=dev
+cd my-shop
+php artisan shop:install
+```
+
+После публикации на Packagist достаточно `composer create-project drsnoxvell-bit/base-shop my-shop`.
+
+Стек витрины:
 
 1. Blade — шаблоны Laravel, без Vue/React
 2. Inertia + Vue — монолит Laravel + Vue
 3. Inertia + React — монолит Laravel + React
-4. Laravel API + Vue SPA — бэкенд Laravel и фронт Vue в одном проекте
-5. Laravel API + React SPA — бэкенд Laravel и фронт React в одном проекте
+4. Laravel API + Vue SPA
+5. Laravel API + React SPA
 
-Невыбранные фронты не ставятся: инсталлятор копирует только нужный stub и подключает только нужные Composer/npm пакеты. В установленной копии каталог `stubs/` удаляется (в исходном git-репозитории шаблоны остаются).
+Невыбранные фронты не ставятся. В установленной копии каталог `stubs/` удаляется.
 
 Неинтерактивно:
 
-```bash
+```powershell
 php artisan shop:install --stack=1
+php artisan shop:install --stack=3
 php artisan shop:install --stack=blade --no-interaction --skip-admin
-php artisan shop:install --stack=inertia-vue
-php artisan shop:install --stack=spa-react --keep-stubs
-```
-
-Затем:
-
-```bash
-# .env: APP_URL, MySQL, ключи OAuth при необходимости
-php artisan migrate
-php artisan db:seed --class=Database\\Seeders\\RoleSeeder
-php artisan orchid:admin
-npm install
-npm run build
 ```
 
 Админка: `/admin`. Витрина: `/`.
+
+Это **скелет приложения** (`type: project`), как Laravel. В уже готовый Laravel его нельзя поставить через `composer require`.
 
 ## OAuth Яндекс и ВКонтакте
 
@@ -105,5 +117,11 @@ VKONTAKTE_CLIENT_SECRET=
 ## Вклад в upstream
 
 Публичный репозиторий только для чтения у всех, кроме владельца [drsnoxvell-bit](https://github.com/drsnoxvell-bit). `git push` в origin у установщика будет отклонён. Не добавляйте коллабораторов с правом Write.
+
+Чтобы `composer create-project drsnoxvell-bit/base-shop` работал без ручного `repositories`, владелец один раз публикует пакет:
+
+1. Закоммитить и запушить `main`
+2. Поставить тег релиза, например `v1.1.0`
+3. На [packagist.org/packages/submit](https://packagist.org/packages/submit) вставить `https://github.com/drsnoxvell-bit/base-shop` и привязать GitHub
 
 См. [docs/UPGRADE.md](docs/UPGRADE.md).
